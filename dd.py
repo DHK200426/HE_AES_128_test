@@ -247,11 +247,7 @@ def calculate_powers_tree(ct_x, degree, engine, relin_key):
                 needed_powers.append(powers[2**bit_idx])
         current_res = needed_powers[0]
         for p_idx in range(1, len(needed_powers)):
-            bootstrapped = engine.bootstrap(
-            current_res, relinearization_key, conjugation_key, bootstrap_key)
-            bootstrapped_p = engine.bootstrap(
-            needed_powers[p_idx], relinearization_key, conjugation_key, bootstrap_key)
-            current_res = engine.multiplyciphertexted(bootstrapped, bootstrapped_p, relin_key)
+            current_res = multiplyciphertexted(current_res, needed_powers[p_idx], relin_key)
 
         powers[i] = current_res
     return powers
@@ -262,7 +258,7 @@ def evaluate_univariate_polynomial(ct_x, coeffs, engine, relin_key):
     result = 0
     for i in range(1, degree + 1):
         if coeffs[i].any() != 0:
-            term = engine.multiplywithplain(powers_of_x[i], coeffs[i])
+            term = multiplywithplain(powers_of_x[i], coeffs[i])
             result = engine.add(result, term)
     return result
 
@@ -275,7 +271,7 @@ def evaluate_16x16_lut(ct_a, ct_b, c, engine, relin_key):
     powers_of_a = calculate_powers_tree(ct_a, 15, engine, relin_key)
     result = ct_Q_list[0]
     for i in range(1, 16):
-        term = engine.multiplyciphertexted(ct_Q_list[i], powers_of_a[i], relin_key)
+        term = multiplyciphertexted(ct_Q_list[i], powers_of_a[i], relin_key)
         result = engine.add(result, term)
     return result
 
@@ -294,7 +290,7 @@ def evaluate_addroundkey(a, b, c, engine, relin_key):
     result = ct_Q_list[0]
     for i in range(1, 15):
         ct_Q_list_enc = engine.encrypt(ct_Q_list[i], public_key)
-        term = engine.multiplyciphertexted(ct_Q_list_enc, powers_of_a[i], relin_key)
+        term = multiplyciphertexted(ct_Q_list_enc, powers_of_a[i], relin_key)
         result = engine.add(result, term)
     return result
 
@@ -348,7 +344,7 @@ def shiftandaddandmasking(a):
     mask = np.zeros(8192)
     for i in [0, 2048, 4096, 6144]:
         mask[i:i + 512] = 1
-    res = engine.multiplywithplain(e, mask)
+    res = multiplywithplain(e, mask)
     return res
 
 def mixcolumnshiftrow(a, b, cms_coeffs):
@@ -381,7 +377,7 @@ def invshiftandaddandmasking(a):
     mask = np.zeros(8192)
     for i in [0, 2048, 4096, 6144]:
         mask[i:i + 512] = 1
-    res = engine.multiplywithplain(e, mask)
+    res = multiplywithplain(e, mask)
     return res
 
 def invmixcolumnshiftrow(a, b, cms_coeffs):
