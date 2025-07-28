@@ -176,7 +176,7 @@ Cforsboxup, Cforsboxdown,inv_Cforsboxup, inv_Cforsboxdown = Cforsub()
     cforsboxup,down -> 4비트 4비트를 입력받아해당 자리에 있는 upper 4 bit lower 4bit를 리턴하는 LUT
 """
 
-engine = Engine(use_bootstrap = True)
+engine = Engine(use_bootstrap = True, mode = "gpu")
 secret_key = engine.create_secret_key()
 public_key = engine.create_public_key(secret_key)
 relinearization_key = engine.create_relinearization_key(secret_key)
